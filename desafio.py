@@ -25,6 +25,66 @@ funções:
 -depósito
 -extrato
 """
+from filecmp import cmpfiles
+
+
+class Usuario:
+    def __init__(self, nome,data_nascimento,cpf,endereco):
+        self.nome = nome
+        self.data_nascimento = data_nascimento
+        self.cpf = cpf
+        self.endereco = endereco
+
+    def __str__(self):
+        return f'{self.nome} (CPF: {self.cpf})'
+
+
+
+class Conta:
+
+    def __init__(self,numero_conta,ususario):
+        self.numero_conta = numero_conta
+        self.usuario = ususario
+        self.saldo = 0.0
+        self.agencia = 1
+
+    def __str__(self):
+        return f'Conta: {self.numero_conta} \nTitular: {self.usuario} \nSaldo: {self.saldo}'
+
+usuarios = []
+contas= []
+
+def cadastrar_cliente():
+    nome = input('Nome : ')
+    data_nascimento = input('Data de nascimento: ')
+    cpf = input('CPF: ')
+    endereco = input("Informe o seu endereço: ")
+
+    for u in usuarios:
+        if u.cpf == cpf:
+            print('Usuário já cadastrado com este CPF!')
+            return
+    novo_usuario = Usuario(nome,data_nascimento,cpf,endereco)
+    usuarios.append(novo_usuario)
+    print(f'Usuário {nome} cadastrado!')
+
+
+def criar_conta():
+    cpf = input('Informe o cpf do titular: ')
+    usuario = next((u for u in usuarios if u.cpf == cpf), None)
+    if not usuario:
+        print(f'Usuário não encontrado.')
+        return
+
+    numero_conta = len(contas)+1
+    nova_conta = Conta(numero_conta, usuario)
+    contas.append(nova_conta)
+    print(f'onta criada para {nova_conta.usuario.nome}, CPF: {nova_conta.usuario.cpf} - Número conta: {nova_conta.numero_conta} - Agência: {nova_conta.agencia} - Saldo: {nova_conta.saldo}')
+
+def listar_conta():
+    print('-----Contas Cadastradas-----')
+    for conta in contas:
+        print(conta)
 
 saldo=0
 limite_valor_saque=500
@@ -74,20 +134,59 @@ def deposito():
         print('Valor inválido para depósito.')
 
 
+def entrar_conta():
+    cpf = input('Informe o cpf do titular: ')
+    usuario = next((u for u in usuarios if u.cpf == cpf), None)
+    if not usuario:
+        print('Usuário não encontrado.')
+        return
+
+    encontrar_conta = int(input('Informe o número da conta: '))
+    conta_cadastrada = next((c for c in contas if c.numero_conta == encontrar_conta), None)
+    if not conta_cadastrada:
+        print('Conta não encontrada.')
+        return
+    menu_conta()
+
+caixa = {
+        "1": cadastrar_cliente,
+        "2": criar_conta,
+        "3": entrar_conta,
+        "4": listar_conta,
+        "5": sair
+}
+
+def menu_principal():
+    while True:
+        print("\n=== MENU ===")
+        print("1. Cadastrar usuário")
+        print("2. Criar Conta")
+        print("3. Entrar em uma conta")
+        print("4. listar contas")
+        print("5. Sair")
+        escolha = input("Escolha uma opção: ")
+
+        funcao = caixa.get(escolha)
+        if funcao:
+            funcao()
+        else:
+            print("Opção inválida.")
+
+
 opcoes_menu={
     "1": deposito,
     "2": saque,
     "3": extrato,
-    "4": sair
+    "4": menu_principal
 }
 
-def menu():
+def menu_conta():
     while True:
         print("\n=== MENU ===")
         print("1. Depositar")
         print("2. Sacar")
         print("3. Extrato")
-        print("4. Sair")
+        print("4. Voltar")
         escolha = input("Escolha uma opção: ")
 
         funcao = opcoes_menu.get(escolha)
@@ -96,8 +195,8 @@ def menu():
         else:
             print("Opção inválida.")
 
-menu()
 
+menu_principal()
 
 
 
